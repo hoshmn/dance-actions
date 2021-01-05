@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Dance Actions</title>
+  <style>
+    #active {
+      border: solid .5px orangered;
+      min-height: 100px;
+      padding: 20px;
+    }
+    #bank {
+      border: solid .5px aquamarine;
+      min-height: 100px;
+      padding: 20px;
+    }
+    #action-count {
+      width: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Dance sentence:</h2>
+  <div id="sentence"></div>
+  <h2>Create a new dance sentence with <input type="number" id="action-count" name="action-count" value="0" min="0" max="100"> words</h2>
+  <button id="create-sentence">Create!</button>
+
+  <h2>Active Words</h2>
+  <div id="active"></div>
+  <input type="text" id="new-word" name="new-word" placeholder="add a word">
+  <button id="add-word">+</button>
+  <h3>Type to add a word, or choose from the word bank below</h3>
+  <div id="bank"></div>
+</body>
+<script>
+  var words = [
+    { status: "bank", name: "twist", },
+    { status: "bank", name: "turn", },
+    { status: "bank", name: "jump", },
+  ]
+
+  function createWord (w) {
+    var word = document.createElement("p")
+    word.innerText = w.name
+    word.onclick = () => {
+      word.remove()
+      var newStatus = w.status === "bank" ? "active" : "bank"
+      w.status = newStatus
+      document.querySelector("#" + newStatus).append(word)
+    }
+    document.querySelector("#" + w.status).append(word)
+  }
+  
+  words.forEach(w => createWord(w))
+
+  document.querySelector("#add-word").onclick = () => {
+    var newWordInput = document.querySelector("#new-word")
+    var name = newWordInput.value
+    if (!name) {
+      console.log('empty')
+      return
+    }
+    
+    var w = { status: "active", name }
+    createWord(w)
+    newWordInput.value = ""
+  }
+
+  document.querySelector("#create-sentence").onclick = () => {
+    var activeWords = words.filter(w => w.status === "active")
+    var selected = []
+    let count = document.querySelector("#action-count").value
+    console.log(count)
+    while (count--) {
+      if (!activeWords.length) {
+        console.log('not enough words')
+        break
+      }
+      var randIdx = Math.floor(Math.random() * activeWords.length)
+      var word = activeWords.splice(randIdx, 1)[0]
+      selected.push(word.name)
+    }
+    document.querySelector("#sentence").textContent = selected.join("! ")+"!"
+  }
+
+</script>
+</html>
