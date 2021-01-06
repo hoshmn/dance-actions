@@ -4,74 +4,218 @@
 <head>
   <title>Dance Actions</title>
   <style>
+    html {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #add8e636;
+    }
+    body {
+      padding: 30px;
+      margin: auto;
+      max-width: 660px;
+    }
+    h2 {
+      margin-bottom: 2px;
+      display: inline-block;
+      font-weight: normal;
+    }
+    #sentence-instruction p {
+      margin-bottom: 5px;
+    }
+    #create-sentence {
+      font-size: large;
+    }
+
+    #sentence {
+      text-transform: uppercase;
+      font-size: 28px;
+      min-height: 32px;
+      line-height: 32px;
+      padding: 20px;
+      background: #f9f5f5;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: blueviolet;
+      border: 4px dotted blueviolet;
+    }
     #active {
-      border: solid .5px orangered;
+      border: outset 2px orangered;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      padding-bottom: 100px;
+      background: #ffe1d6;
+      min-height: 100px;
+      border-bottom-left-radius: 50%;
+      border-bottom-right-radius: 50%;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+    /* #bank {
+      border: solid .5px black;
       min-height: 100px;
       padding: 20px;
+    } */
+    
+    #active:empty::after {
+      content: "type or select a word below to add to the bowl";
+      color: grey;
+      font-size: smaller;
     }
-    #bank {
-      border: solid .5px aquamarine;
-      min-height: 100px;
-      padding: 20px;
-    }
+
     #action-count {
-      width: 24px;
+      width: 30px;
     }
+    #create-sentence, #add-word input[type=submit] {
+      border-radius: 5px;
+      color: white;
+      background: #aa6ee1;
+    }
+    #create-sentence {
+      padding: 10px;
+    }
+    #add-word input {
+      font-size: 16px;
+      padding: 3px 7px;
+    }
+      
+    #new-word {
+      margin-top: 25px;
+      margin-bottom: 5px;
+    }
+
+    .word {
+      display: inline-block;
+      margin: 3px;
+      padding: 10px;
+      border: .5px solid;
+      margin-right: 5px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      font: caption;
+      letter-spacing: 1px;
+    }
+    .word::after {
+      padding-left: 5px;
+      color: gray;
+    }
+
+    #active .word {
+      background: rgb(252, 222, 184);
+      border-color: orangered;
+    }
+    #bank .word {
+      background: rgb(181, 210, 207);
+      border-color: rgb(86, 96, 71);
+    }
+
+    #active .word::after {
+      content: "╳";
+    }
+    #bank .word::after {
+      content: "+";
+    }
+
   </style>
 </head>
 
 <body>
-  <h2>Dance sentence:</h2>
   <div id="sentence"></div>
-  <h2>Create a new dance sentence with <input type="number" id="action-count" name="action-count" value="0" min="0" max="100"> words</h2>
-  <button id="create-sentence">Create!</button>
+  <div id="sentence-instruction">
+    <p>Create a new dance sentence with <input type="number" id="action-count" name="action-count" value="1" min="1"
+        max="100"> <span class="plural">words</span><span class="singular">word</span> from the bowl</p>
+    <button id="create-sentence">Create!</button><br />
+  </div>
 
-  <h2>Active Words</h2>
+  <h2>Possible Words</h2>
   <div id="active"></div>
-  <input type="text" id="new-word" name="new-word" placeholder="add a word">
-  <button id="add-word">+</button>
-  <h3>Type to add a word, or choose from the word bank below</h3>
+  <form id="add-word">
+    <input type="text" id="new-word" name="new-word" placeholder="add word">
+    <input type="submit" value="+">
+    </form>
   <div id="bank"></div>
 </body>
+
 <script>
   var words = [
-    { status: "bank", name: "twist", },
-    { status: "bank", name: "turn", },
-    { status: "bank", name: "jump", },
+    { active: false, name: "bend", },
+    { active: false, name: "dart", },
+    { active: false, name: "jump", },
+    { active: false, name: "turn", },
+    { active: false, name: "twist", },
   ]
 
   function createWord (w) {
     var word = document.createElement("p")
+    word.className = "word"
     word.innerText = w.name
     word.onclick = () => {
       word.remove()
-      var newStatus = w.status === "bank" ? "active" : "bank"
-      w.status = newStatus
-      document.querySelector("#" + newStatus).append(word)
+      w.active = !w.active
+      document.querySelector(w.active ? "#active" : "#bank").append(word)
+
+      updateSentenceInstruction()
     }
-    document.querySelector("#" + w.status).append(word)
+    document.querySelector(w.active ? "#active" : "#bank").append(word)
   }
   
   words.forEach(w => createWord(w))
 
-  document.querySelector("#add-word").onclick = () => {
+  function updatePlural() {
+    var acElem = document.querySelector("#action-count")
+    var useSingular = Number(acElem.value) === 1
+    var singular = document.querySelector("#sentence-instruction .singular")
+    singular.style.display = useSingular ? "inline" : "none"
+    var plural = document.querySelector("#sentence-instruction .plural")
+    plural.style.display = useSingular ? "none" : "inline"
+  }
+
+  function updateSentenceInstruction() {
+    var activeWordCount = words.filter(w => w.active).length
+
+    var siElem = document.querySelector("#sentence-instruction")
+    siElem.style.visibility = activeWordCount ? "visible" : "hidden"
+    if (!activeWordCount) {
+      return
+    }
+
+    // update the max and value of the number input
+    var acElem = siElem.querySelector("#action-count")
+    acElem.max = activeWordCount
+    if (acElem.value > acElem.max) {
+      acElem.value = acElem.max
+    }
+
+    updatePlural()
+  }
+
+                document.querySelector("#add-word").onsubmit = e => {
+                  e.preventDefault()
+
     var newWordInput = document.querySelector("#new-word")
     var name = newWordInput.value
     if (!name) {
       console.log('empty')
       return
     }
-    
-    var w = { status: "active", name }
+
+    var w = { active: true, name }
     createWord(w)
+    words.push(w)
     newWordInput.value = ""
+
+    updateSentenceInstruction()
+  }
+
+  document.querySelector("#action-count").onchange = () => {
+    updatePlural()
   }
 
   document.querySelector("#create-sentence").onclick = () => {
-    var activeWords = words.filter(w => w.status === "active")
+    var activeWords = words.filter(w => w.active)
     var selected = []
     let count = document.querySelector("#action-count").value
-    console.log(count)
+
     while (count--) {
       if (!activeWords.length) {
         console.log('not enough words')
@@ -81,8 +225,9 @@
       var word = activeWords.splice(randIdx, 1)[0]
       selected.push(word.name)
     }
-    document.querySelector("#sentence").textContent = selected.join("! ")+"!"
+    document.querySelector("#sentence").textContent = selected.join(" + ")
   }
 
+    updateSentenceInstruction()
 </script>
 </html>
