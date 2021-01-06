@@ -2,6 +2,8 @@
 <html>
 
 <head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
   <title>Dance Actions</title>
   <style>
     html {
@@ -12,6 +14,8 @@
       padding: 30px;
       margin: auto;
       max-width: 660px;
+      position: relative;
+      min-height: calc(100vh - 60px);
     }
     h2 {
       margin-bottom: 2px;
@@ -19,7 +23,7 @@
       font-weight: normal;
     }
     #sentence-instruction p {
-      margin-bottom: 5px;
+      margin: 25px 0 5px;
     }
     #create-sentence {
       font-size: large;
@@ -42,22 +46,22 @@
       border: outset 2px orangered;
       box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
       padding: 20px;
-      padding-bottom: 100px;
+      padding-bottom: 85px;
       background: #ffe1d6;
-      min-height: 100px;
-      border-bottom-left-radius: 50%;
-      border-bottom-right-radius: 50%;
+      min-height: 80px;
+      border-bottom-left-radius: 42%;
+      border-bottom-right-radius: 42%;
       border-top-left-radius: 5px;
       border-top-right-radius: 5px;
+      display: flex;
+      flex-direction: row-reverse;
+      flex-wrap: wrap-reverse;
+      align-items: end;
+      justify-content: center;
     }
-    /* #bank {
-      border: solid .5px black;
-      min-height: 100px;
-      padding: 20px;
-    } */
     
     #active:empty::after {
-      content: "type or select a word below to add to the bowl";
+      content: "type or select words below to add to the bowl";
       color: grey;
       font-size: smaller;
     }
@@ -69,6 +73,7 @@
       border-radius: 5px;
       color: white;
       background: #aa6ee1;
+      cursor: pointer;
     }
     #create-sentence {
       padding: 10px;
@@ -76,6 +81,9 @@
     #add-word input {
       font-size: 16px;
       padding: 3px 7px;
+    }
+    #add-word input[type=text] {
+      width: 110px;
     }
       
     #new-word {
@@ -94,6 +102,7 @@
       cursor: pointer;
       font: caption;
       letter-spacing: 1px;
+      user-select: none;
     }
     .word::after {
       padding-left: 5px;
@@ -116,15 +125,34 @@
       content: "+";
     }
 
+    #delete-words {
+      position: absolute;
+      bottom: 4px;
+      right: 30px;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+      color: gray;
+    }
+    #delete-words:hover {
+      color: #aa6ee1;
+    }
+
   </style>
 </head>
 
 <body>
   <div id="sentence"></div>
   <div id="sentence-instruction">
-    <p>Create a new dance sentence with <input type="number" id="action-count" name="action-count" value="1" min="1"
-        max="100"> <span class="plural">words</span><span class="singular">word</span> from the bowl</p>
-    <button id="create-sentence">Create!</button><br />
+    <p>
+      Create a new dance sentence with
+      <input type="number" id="action-count" name="action-count" value="1" min="1" max="100">
+      <span class="plural">words</span>
+      <span class="singular">word</span>
+      from the bowl
+    </p>
+    <button id="create-sentence">Create!</button>
   </div>
 
   <h2>Possible Words</h2>
@@ -134,6 +162,7 @@
     <input type="submit" value="+">
     </form>
   <div id="bank"></div>
+  <button id="delete-words" title="permanently remove all words not currently in the bowl">delete inactive words</button>
 </body>
 
 <script>
@@ -189,8 +218,8 @@
     updatePlural()
   }
 
-                document.querySelector("#add-word").onsubmit = e => {
-                  e.preventDefault()
+  document.querySelector("#add-word").onsubmit = e => {
+    e.preventDefault()
 
     var newWordInput = document.querySelector("#new-word")
     var name = newWordInput.value
@@ -228,6 +257,12 @@
     document.querySelector("#sentence").textContent = selected.join(" + ")
   }
 
-    updateSentenceInstruction()
+  document.querySelector("#delete-words").onclick = () => {
+    words = words.filter(w => w.active)
+
+    Array.from(document.querySelector("#bank").childNodes).forEach(n => n.remove())
+  }
+
+  updateSentenceInstruction()
 </script>
 </html>
