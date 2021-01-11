@@ -136,6 +136,8 @@
       background: none;
       border: none;
       color: gray;
+      cursor: pointer;
+      text-decoration: underline;
     }
     .subtle-button:hover {
       color: #aa6ee1;
@@ -146,6 +148,7 @@
       left: calc(50% - 30px);
       width: 60px;
       font-size: 14px;
+      text-decoration: none;
     }
     #remove-all {
       bottom: 8px;
@@ -154,11 +157,19 @@
       bottom: -18px;
     }
       
-    #delete-words {
+    #attribution {
       position: absolute;
       bottom: 4px;
       right: 30px;
-      text-decoration: underline;
+      color: gray;
+      font-size: 11px;
+    }
+      
+    #delete-words {
+      position: absolute;
+      bottom: 4px;
+      left: 30px;
+      font-size: 11px;
     }
 
   </style>
@@ -188,6 +199,9 @@
     <input type="submit" value="+">
   </form>
   <div id="bank"></div>
+  <span id="attribution">
+    by <a class="subtle-button" href="https://github.com/hoshmn/dance-actions" target="__blank">josh</a>
+  </span>
   <button id="delete-words" class="subtle-button" title="remove all words not currently in the bowl">delete inactive words</button>
 </body>
 
