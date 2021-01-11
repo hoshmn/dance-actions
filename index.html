@@ -202,6 +202,56 @@
     { active: false, name: "zoom", },
   ]
 
+    var queryString = document.location.search.slice(1)
+    if (queryString.length) {
+      var loadedWords = []
+
+      var [rawActive, cleanBank] = queryString.split("bank=")
+
+      if (cleanBank) {
+        var bankWords = cleanBank.split(",")
+        loadedWords.push(...bankWords.map(w => ({ active: false, name: w })))
+
+        // clear the &
+        rawActive = rawActive.slice(0, -1)
+      }
+
+      // trash will be empty if the queryString is well-formed
+      var [trash, cleanActive] = rawActive.split("active=")
+      if (cleanActive) {
+        var activeWords = cleanActive.split(",")
+        loadedWords.push(...activeWords.map(w => ({ active: true, name: w })))
+      }
+
+      if (loadedWords.length) {
+        words = loadedWords
+      } else {
+        window.history.replaceState(null, null, "?")
+      }
+    }
+
+    words.forEach(w => createWord(w))
+
+    function updateUrl() {
+      var active = words.filter(w => w.active)
+      var bank = words.filter(w => !w.active)
+      var queryString = "?"
+      if (active.length) {
+        var activeWords = active.map(w => w.name).join(",")
+        console.log(activeWords)
+        queryString += "active=" + activeWords
+        if (bank.length) {
+          queryString += "&"
+        }
+      }
+      if (bank.length) {
+        var bankWords = bank.map(w => w.name).join(",")
+        console.log(bankWords)
+        queryString += "bank=" + bankWords
+      }
+      window.history.replaceState(null, null, queryString)
+    }
+
   function createWord (w) {
     var word = document.createElement("p")
     word.className = "word"
@@ -212,11 +262,10 @@
       document.querySelector(w.active ? "#active" : "#bank").append(word)
 
       updateSentenceInstruction()
+      updateUrl()
     }
     document.querySelector(w.active ? "#active" : "#bank").append(word)
   }
-  
-  words.forEach(w => createWord(w))
 
   function updatePlural() {
     var acElem = document.querySelector("#action-count")
@@ -262,6 +311,7 @@
     newWordInput.value = ""
 
     updateSentenceInstruction()
+    updateUrl()
   }
 
   document.querySelector("#action-count").onchange = () => {
@@ -289,6 +339,8 @@
     words = words.filter(w => w.active)
 
     Array.from(document.querySelector("#bank").childNodes).forEach(n => n.remove())
+
+    updateUrl()
   }
 
   updateSentenceInstruction()
