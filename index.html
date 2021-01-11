@@ -22,6 +22,10 @@
       display: inline-block;
       font-weight: normal;
     }
+    button {
+      cursor: pointer;
+    }
+
     #sentence-instruction p {
       margin: 25px 0 5px;
     }
@@ -40,10 +44,10 @@
       font-weight: bold;
       letter-spacing: 1px;
       color: blueviolet;
-      border: 4px dotted blueviolet;
+      border: 8px dotted blueviolet;
     }
     #active {
-      border: outset 2px orangered;
+      border: outset 6px orangered;
       box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
       padding: 20px;
       padding-bottom: 85px;
@@ -78,17 +82,16 @@
     #create-sentence {
       padding: 10px;
     }
+
+    #add-word {
+      margin: 50px 0 5px;
+    }
     #add-word input {
       font-size: 16px;
       padding: 3px 7px;
     }
     #add-word input[type=text] {
       width: 110px;
-    }
-      
-    #new-word {
-      margin-top: 25px;
-      margin-bottom: 5px;
     }
 
     .word {
@@ -125,18 +128,37 @@
       content: "+";
     }
 
+    .bowl {
+      position: relative;
+    }
+
+    .subtle-button {
+      background: none;
+      border: none;
+      color: gray;
+    }
+    .subtle-button:hover {
+      color: #aa6ee1;
+    }
+
+    #remove-all, #add-all {
+      position: absolute;
+      left: calc(50% - 30px);
+      width: 60px;
+      font-size: 14px;
+    }
+    #remove-all {
+      bottom: 8px;
+    }
+    #add-all {
+      bottom: -18px;
+    }
+      
     #delete-words {
       position: absolute;
       bottom: 4px;
       right: 30px;
-      background: none;
-      border: none;
       text-decoration: underline;
-      cursor: pointer;
-      color: gray;
-    }
-    #delete-words:hover {
-      color: #aa6ee1;
     }
 
   </style>
@@ -155,14 +177,18 @@
     <button id="create-sentence">Create!</button>
   </div>
 
-  <h2>Possible Words</h2>
-  <div id="active"></div>
+  <div class="bowl">
+    <h2>Possible Words</h2>
+    <div id="active"></div>
+    <button id="remove-all" class="subtle-button" title="empty bowl">↓ ↓ ↓</button>
+    <button id="add-all" class="subtle-button" title="fill bowl">↑ ↑ ↑</button>
+  </div>
   <form id="add-word">
     <input type="text" id="new-word" name="new-word" placeholder="add word">
     <input type="submit" value="+">
-    </form>
+  </form>
   <div id="bank"></div>
-  <button id="delete-words" title="remove all words not currently in the bowl">delete inactive words</button>
+  <button id="delete-words" class="subtle-button" title="remove all words not currently in the bowl">delete inactive words</button>
 </body>
 
 <script>
@@ -238,7 +264,6 @@
     var queryString = "?"
     if (active.length) {
       var activeWords = active.map(w => w.name).join(",")
-      console.log(activeWords)
       queryString += "active=" + activeWords
       if (bank.length) {
         queryString += "&"
@@ -246,7 +271,6 @@
     }
     if (bank.length) {
       var bankWords = bank.map(w => w.name).join(",")
-      console.log(bankWords)
       queryString += "bank=" + bankWords
     }
     window.history.replaceState(null, null, queryString)
@@ -333,6 +357,29 @@
       selected.push(word.name)
     }
     document.querySelector("#sentence").textContent = selected.join(" + ")
+  }
+
+  function toggleAll(setActive) {
+    words.forEach(w => {
+      if (w.active !== setActive) {
+        w.active = setActive
+        createWord(w)
+      }
+    })
+
+    var emptyTarget = setActive ? "#bank" : "#active"
+    Array.from(document.querySelector(emptyTarget).childNodes).forEach(n => n.remove())
+
+    updateSentenceInstruction()
+    updateUrl()
+  }
+
+  document.querySelector("#add-all").onclick = () => {
+    toggleAll(true)
+  }
+
+  document.querySelector("#remove-all").onclick = () => {
+    toggleAll(false)
   }
 
   document.querySelector("#delete-words").onclick = () => {
