@@ -260,7 +260,7 @@
     { active: false, name: "zoom", },
   ]
 
-  var queryString = document.location.search.slice(1)
+    var queryString = decodeURIComponent(document.location.search.slice(1))
   if (queryString.length) {
 
     var loadedWords = []
